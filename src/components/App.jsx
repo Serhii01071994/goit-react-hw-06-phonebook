@@ -1,65 +1,46 @@
-import React, { useState, useEffect } from 'react';
 import { PhoneBook } from './PhoneBook/PhoneBook';
 import { ContactList } from './ContactList/ContactList';
 import { nanoid } from 'nanoid';
 import { ContactFilter } from './ContactFilter/ContactFilter';
 import css from './App.module.css';
-
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact, delContact } from 'redux/contactsReducer';
 
 export const App = () => {
-  const [contacts, setContacts] = useState([]);
-  const [filter, setFilter] = useState('');
+  const contacts = useSelector(state => state.contacts.contacts);
+  const filter = useSelector(state => state.filter.filter);
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    const contactsJson = localStorage.getItem('contacts');
-    if (contactsJson) {
-      setContacts(JSON.parse(contactsJson));
-    }
-  }, []);
- 
-  useEffect(() => {
-    localStorage.setItem('contacts', JSON.stringify(contacts));
-  }, [contacts]);
-
-  const handlAddContact = contactData => {
-    const { name } = contactData;
-    if (contacts.some(contact => contact.name === name)) {
-      alert(`Contact ${name} is already in contacts!`);
-      return;
-    }
-
-    const newContact = {
-      id: nanoid(),
-      ...contactData,
-    };
-    setContacts(prevContacts => [...prevContacts, newContact],
-    );
-  };
-
-  const handleFilterChange = event => {
-    setFilter(event.target.value.toLowerCase() );
+  const handlAddContact = ({ e, name, number }) => {
+    e.prventDefault();
+    dispatch(addContact({ name: name, number: number, id: nanoid() }));
   };
 
   const handleDeleteContact = id => {
-    setContacts(prevContacts =>
-      prevContacts.filter(contact => contact.id !== id)
-    );
+    dispatch(delContact(id));
   };
 
-  const filteredContacts = contacts.filter(
-    contact => typeof contact.name === 'string' &&
-      contact.name.toLowerCase().includes(filter)
-  );
+  const filteredContacts = filter => {
+    try {
+      return contacts.filter(
+        contact =>
+          contact.name.toLowerCase().includes(filter.toLowerCase()) ||
+          contact.number.includes(filter)
+      );
+    } catch (err) {
+      return contacts;
+    }
+  };
 
   return (
     <div className={css.container}>
       <h1 className={css.title}>Phonebook</h1>
       <PhoneBook handlAddContact={handlAddContact} />
       <h2 className={css.title}>Contacts</h2>
-      <ContactFilter filter={filter} handleFilterChange={handleFilterChange} />
+      <ContactFilter filter={filter} contacts={contacts} />
       <ContactList
-        contacts={filteredContacts}
-        onDeleteContact={handleDeleteContact}
+        contacts={filteredContacts(filter) ?? []}
+        handleDeleteContact={handleDeleteContact}
       />
     </div>
   );
