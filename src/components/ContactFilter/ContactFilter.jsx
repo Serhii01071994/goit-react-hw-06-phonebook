@@ -3,7 +3,7 @@ import css from './ContactFilter.module.css';
 import { setFilter } from 'redux/filterReducer';
 
 export const ContactFilter = () => {
-  const filter = useSelector(state => state.filter);
+  const filter = useSelector(state => state.filter.filter);
   const dispatch = useDispatch();
 
   const handleFilterChange = e => {
