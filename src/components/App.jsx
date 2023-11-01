@@ -1,45 +1,34 @@
 import { PhoneBook } from './PhoneBook/PhoneBook';
 import { ContactList } from './ContactList/ContactList';
-import { nanoid } from 'nanoid';
 import { ContactFilter } from './ContactFilter/ContactFilter';
 import css from './App.module.css';
 import { useDispatch, useSelector } from 'react-redux';
-import { addContact, delContact } from 'redux/contactsReducer';
+import { delContact } from 'redux/contactsReducer';
 
 export const App = () => {
   const contacts = useSelector(state => state.contacts.contacts);
   const filter = useSelector(state => state.filter.filter);
   const dispatch = useDispatch();
 
-  const handlAddContact = ({ e, name, number }) => {
-    e.prventDefault();
-    dispatch(addContact({ name: name, number: number, id: nanoid() }));
-  };
-
   const handleDeleteContact = id => {
     dispatch(delContact(id));
   };
 
-  const filteredContacts = filter => {
-    try {
-      return contacts.filter(
-        contact =>
-          contact.name.toLowerCase().includes(filter.toLowerCase()) ||
-          contact.number.includes(filter)
-      );
-    } catch (err) {
-      return contacts;
-    }
-  };
+  const filteredContacts = contacts.filter(
+    contact =>
+      typeof contact.name === 'string' &&
+      contact.name.toLowerCase().includes(filter)
+  );
+   
 
   return (
     <div className={css.container}>
       <h1 className={css.title}>Phonebook</h1>
-      <PhoneBook handlAddContact={handlAddContact} />
+      <PhoneBook/>
       <h2 className={css.title}>Contacts</h2>
-      <ContactFilter filter={filter} contacts={contacts} />
+      <ContactFilter/>
       <ContactList
-        contacts={filteredContacts(filter) ?? []}
+        contacts={filteredContacts}
         handleDeleteContact={handleDeleteContact}
       />
     </div>

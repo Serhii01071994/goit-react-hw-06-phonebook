@@ -9,7 +9,7 @@ export const PhoneBook = () => {
     number: '',
   });
   const dispatch = useDispatch();
-  const contacts = useSelector(state => state.contacts.contactsData);
+  const contacts = useSelector(state => state.contacts.contacts);
 
   const handleInput = e => {
     const { name, value } = e.target;
@@ -23,7 +23,7 @@ export const PhoneBook = () => {
     event.preventDefault();
     if (contacts.some(contact => contact.name === formData.name)) {
       alert(`Contact ${formData.name} is already in contacts!`);
-      setFormData('');
+      setFormData({ name: '', number: '' });
       return;
     }
     dispatch(addContact(formData));
